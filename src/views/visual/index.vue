@@ -267,7 +267,7 @@
   import List from './components/List'
   import VueMarquee from 'vue-marquee'
 
-  import { spider_list, hot_hours, hot_data, class_data, near7Days, genRunTimeData } from './data.js'
+  import { hot_hours, hot_data, class_data, near7Days, genRunTimeData } from './data.js'
   import { draw_crawl_class, draw_hot, draw_rutime, draw_rank } from './echarts_draw.js'
 
   import img_logo from '@/assets/logo.png'
@@ -290,7 +290,7 @@
       }
     },
     mounted: function() {
-      let hotDays = near7Days()
+      const hotDays = near7Days()
       this.spider_list = genRunTimeData()
       draw_crawl_class('crawl_class', class_data)
       draw_hot('hot', hot_hours, hotDays, hot_data)

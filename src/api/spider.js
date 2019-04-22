@@ -43,6 +43,28 @@ export function runOnce(project_id, spider_name) {
   })
 }
 
+export function apiCancelspider(project_id, project_name,index) {
+  return new Promise((resolve, reject) => {
+    request({
+      url: '/cancelspider',
+      method: 'post',
+      data: querystring.stringify({
+        project_id: project_id,
+        project_name: project_name,
+        index:index
+        
+        
+      })
+    }).then((res) => {
+      resolve(res)
+    }).catch((e) => {
+      reject(e)
+    })
+  })
+}
+
+
+
 export function getMasterLog(project_id, job_exec_id) {
   return request({
     url: '/masterlog',
