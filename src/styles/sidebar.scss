@@ -48,22 +48,22 @@
   }
   .hideSidebar {
     .sidebar-container {
-      width: 36px !important;
+      width: 70px !important;
     }
     .main-container {
-      margin-left: 36px;
+      margin-left: 70px;
     }
     .submenu-title-noDropdown {
-      padding-left: 10px !important;
+      padding-left: 36px !important;
       position: relative;
       .el-tooltip {
-        padding: 0 10px !important;
+        padding: 0 36px !important;
       }
     }
     .el-submenu {
       overflow: hidden;
       &>.el-submenu__title {
-        padding-left: 10px !important;
+        padding-left: 36px !important;
         .el-submenu__icon-arrow {
           display: none;
         }
