@@ -305,7 +305,6 @@
           </select>
         </el-form-item>
 
-
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -338,14 +337,14 @@
 <script>
   import { apiGetProjectInfo, delProject } from '@/api/project'
   import { addScheduler } from '@/api/spider'
-  import {  runOnce , apiCancelspider  } from '@/api/spider'
+  import { runOnce, apiCancelspider } from '@/api/spider'
   import { getMasterLog, getSlaveLog } from '@/api/spider'
 
   export default {
     data() {
       return {
         project_info: {
-          is_msd:null,
+          is_msd: null,
           project_id: null,
           project_name: null,
           project_alias: null,
@@ -381,10 +380,9 @@
       // 获取工程信息
       async getProjectInfo() {
         try {
-         let res = await apiGetProjectInfo(this.$route.params.name)
-         this.project_info = res.data
-         this.schedulerForm.project_id = res.data.project_id
-         
+          const res = await apiGetProjectInfo(this.$route.params.name)
+          this.project_info = res.data
+          this.schedulerForm.project_id = res.data.project_id
         } catch (e) {
           this.$message.error('获取信息错误 ' + e)
         }
@@ -395,7 +393,6 @@
         this.schedulerForm.spider_name = spider_name
         this.dialogFormVisible = true
       },
-      
       // 添加调度
       addScheduler: function() {
         this.dialogFormVisible = false
@@ -404,7 +401,7 @@
           this.loading = false
           this.$message('添加调度成功')
           // 重新再获取一次工程信息
-          getProjectInfo(this.$route.params.name).then(response => {
+          this.getProjectInfo(this.$route.params.name).then(response => {
             this.project_info = response.data
             this.schedulerForm.project_id = response.data.project_id
           }).catch(err => {
@@ -428,18 +425,17 @@
         })
       },
 
-      //取消爬虫
+      // 取消爬虫
       async cancelspider(project_id, project_name, excute_job_index) {
         try {
           this.loading = true
-          let res = await apiCancelspider(project_id, project_name, excute_job_index)
+          await apiCancelspider(project_id, project_name, excute_job_index)
           this.loading = false
           this.getProjectInfo()
         } catch (e) {
           this.$message.error('取消爬虫错误 ' + e)
         }
       },
-
 
       // 查看主爬虫log
       viewMasterLog: function(project_id, job_exec_id) {

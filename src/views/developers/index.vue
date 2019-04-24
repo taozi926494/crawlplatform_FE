@@ -124,7 +124,7 @@
 
 <script>
   //
-  import { apiListDevelopers, apiAddDevelopers, apiDelDeveloper,apiEditDeveloper } from '@/api/developers'
+  import { apiListDevelopers, apiAddDevelopers, apiDelDeveloper, apiEditDeveloper } from '@/api/developers'
   export default {
     data() {
       return {
@@ -153,68 +153,65 @@
       async listDevelopers() {
         this.listLoading = true
         try {
-          let res = await apiListDevelopers()
+          const res = await apiListDevelopers()
           this.list = res.data
         } catch (e) {
           this.$message.error('开发人员列表获取错误 ' + e)
         }
-        this.listLoading = false;
+        this.listLoading = false
       },
 
       // 添加函数
       async addDevelopers() {
-       this.$refs.developerForm.validate(valid => {
-        if (valid){
-          this.loading = true
-          try {
-            let res = apiAddDevelopers(this.developerForm)
-            this.listDevelopers()
-          } catch (e) {
-            this.$message.error('开发人员列表获取错误 ' + e)
+        this.$refs.developerForm.validate(valid => {
+          if (valid) {
+            this.loading = true
+            try {
+              apiAddDevelopers(this.developerForm)
+              this.listDevelopers()
+            } catch (e) {
+              this.$message.error('开发人员列表获取错误 ' + e)
+            }
+            this.loading = false
+            this.dialogFormVisible = false
+          } else {
+            return false
           }
-          this.loading = false
-          this.dialogFormVisible = false
-        }else{
-          console.log('err submit')
-          return false
-        }     
-       })
+        })
       },
 
       async delDevelopers(param) {
         this.listLoading = false
         try {
-          let res = await this.$confirm('此操作将永久删除该选项, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+          const res = await this.$confirm('此操作将永久删除该选项, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
           }).catch(() => {
-             this.$message.error('已取消操作！ ')
-        })
-        if (res === "confirm"){
-          const res = await apiDelDeveloper(param)
-          this.listDevelopers()
-        } 
+            this.$message.error('已取消操作！ ')
+          })
+          if (res === 'confirm') {
+            await apiDelDeveloper(param)
+            this.listDevelopers()
+          }
         } catch (e) {
           this.$message.error('开发人员删除获取错误 ' + e)
         }
-        this.listLoading = false;
+        this.listLoading = false
       },
 
-
-       // 编辑开发人员
+      // 编辑开发人员
       async submitEdit() {
-        this.listLoading = true;
+        this.listLoading = true
         try {
-          const res = await apiEditDeveloper(this.editdeveloperForm)
+          await apiEditDeveloper(this.editdeveloperForm)
           this.listDevelopers()
         } catch (e) {
           this.$message.error('编辑开发人员出错 ' + e)
         }
-        this.listLoading = false;
-        this.dialogVisible = false;
-      },
-
+        this.listLoading = false
+        this.dialogVisible = false
+      }
     }
   }
 </script>

@@ -78,7 +78,7 @@ export default {
         project_alias: null,
         for_project: null,
         applicant: null,
-        is_msd:1,
+        is_msd: 1,
         developers: []
       },
       formRules: {
@@ -95,28 +95,24 @@ export default {
     }
   },
 
-
   // 拉取参数
   created() {
     this.listDevelopers()
   },
 
-
   methods: {
     async listDevelopers() {
-        try {
-          let res = await apiListDevelopers()
-          let data_list = []
-          for(var i=0; i<res.data.length;i++){
-            if (res.data[i].developer_status=='0') data_list.push(res.data[i].developer_name)
-          }
-          this.developer_list = data_list
-        } catch (e) {
-          this.$message.error('开发人员列表获取错误 ' + e)
+      try {
+        const res = await apiListDevelopers()
+        const data_list = []
+        for (var i = 0; i < res.data.length; i++) {
+          if (res.data[i].developer_status === '0') data_list.push(res.data[i].developer_name)
         }
-      },
-
-
+        this.developer_list = data_list
+      } catch (e) {
+        this.$message.error('开发人员列表获取错误 ' + e)
+      }
+    },
     validEgg: function(eggfile) {
       if (eggfile === undefined) {
         return false
@@ -133,9 +129,9 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           // 单机爬虫格式
-          if(this.form.is_msd==0){
+          var formData = new FormData()
+          if (this.form.is_msd === 0) {
             this.loading = true
-            var formData = new FormData()
             formData.append('is_msd', this.form.is_msd)
             formData.append('project_name', this.form.project_name)
             formData.append('project_alias', this.form.project_alias)
@@ -163,10 +159,8 @@ export default {
                 type: 'warning'
               })
             }
-
-          }else{
+          } else {
             this.loading = true
-            var formData = new FormData()
             formData.append('is_msd', this.form.is_msd)
             formData.append('project_name', this.form.project_name)
             formData.append('project_alias', this.form.project_alias)
@@ -179,7 +173,7 @@ export default {
               formData.append('master_egg', master_egg)
               formData.append('slave_egg', slave_egg)
               // 发起上传请求
-              var _self = this
+              _self = this
               upload.post('/addproject', formData).then((response) => {
                 _self.loading = false
                 if (response.status === 'success') {
@@ -197,7 +191,6 @@ export default {
               })
             }
           }
-
         } else {
           console.log('err submit')
           return false

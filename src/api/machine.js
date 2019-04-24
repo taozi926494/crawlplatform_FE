@@ -1,7 +1,6 @@
 import request from '@/utils/request'
 const querystring = require('querystring')
 
-
 // 新的请求函数， 获取服务器列表请求
 export function apiListMachine() {
   return new Promise((resolve, reject) => {
@@ -16,7 +15,6 @@ export function apiListMachine() {
   })
 }
 
-
 // 添加服务器
 export function apiAddmachine(machine) {
   return new Promise((resolve, reject) => {
@@ -24,10 +22,10 @@ export function apiAddmachine(machine) {
       url: 'addmachine',
       method: 'post',
       data: querystring.stringify({
-              server_ip: machine.server_ip,
-              server_status: machine.server_status,
-              is_master: machine.is_master
-            })
+        server_ip: machine.server_ip,
+        server_status: machine.server_status,
+        is_master: machine.is_master
+      })
     }).then((res) => {
       resolve(res)
     }).catch((e) => {

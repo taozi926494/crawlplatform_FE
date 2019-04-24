@@ -8,7 +8,6 @@ export function getAllProject() {
   })
 }
 
-
 export function apiGetProjectInfo(project_name) {
   return new Promise((resolve, reject) => {
     request({
@@ -24,7 +23,6 @@ export function apiGetProjectInfo(project_name) {
     })
   })
 }
-
 
 export function delProject(project_name) {
   return request({

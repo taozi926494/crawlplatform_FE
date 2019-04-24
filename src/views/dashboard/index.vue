@@ -51,7 +51,7 @@
 
 <script>
 import { getAllSpider } from '@/api/spider'
-import { runOnce , apiCancelspider} from '@/api/spider'
+import { runOnce, apiCancelspider } from '@/api/spider'
 import { getMasterLog, getSlaveLog } from '@/api/spider'
 
 export default {
@@ -77,19 +77,18 @@ export default {
       })
     },
 
-    //取消爬虫
+    // 取消爬虫
     async cancelspider(project_id, project_name, excute_job_index) {
       try {
         this.loading = true
-        let res = await apiCancelspider(project_id, project_name, excute_job_index)
+        await apiCancelspider(project_id, project_name, excute_job_index)
         this.loading = false
-       
       } catch (e) {
         this.$message.error('取消爬虫错误 ' + e)
       }
     },
 
-
+    // 单次运行爬虫
     runOnce: function(project_id, spider_name) {
       this.listLoading = true
       runOnce(project_id, spider_name).then(response => {
@@ -101,6 +100,8 @@ export default {
         }
       })
     },
+
+    // 查看主爬虫日志
     viewMasterLog: function(project_id, job_exec_id) {
       this.dialogVisible = true
       this.log = []
@@ -108,6 +109,8 @@ export default {
         this.log = response.log
       })
     },
+
+    // 查看从爬虫日志
     viewSlaveLog: function(project_id, job_exec_id) {
       this.dialogVisible = true
       this.log = []

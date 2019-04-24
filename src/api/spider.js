@@ -43,7 +43,7 @@ export function runOnce(project_id, spider_name) {
   })
 }
 
-export function apiCancelspider(project_id, project_name,index) {
+export function apiCancelspider(project_id, project_name, index) {
   return new Promise((resolve, reject) => {
     request({
       url: '/cancelspider',
@@ -51,9 +51,7 @@ export function apiCancelspider(project_id, project_name,index) {
       data: querystring.stringify({
         project_id: project_id,
         project_name: project_name,
-        index:index
-        
-        
+        index: index
       })
     }).then((res) => {
       resolve(res)
@@ -62,8 +60,6 @@ export function apiCancelspider(project_id, project_name,index) {
     })
   })
 }
-
-
 
 export function getMasterLog(project_id, job_exec_id) {
   return request({

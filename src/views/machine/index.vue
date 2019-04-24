@@ -103,13 +103,14 @@
         }
         this.listLoading = false
       },
+
       // 添加服务器
       async addMachine() {
         this.$refs.machineForm.validate(valid => {
           if (valid) {
             this.loading = true
             try {
-              const res = apiAddmachine(this.machineForm)
+              apiAddmachine(this.machineForm)
               this.loading = false
               this.dialogFormVisible = false
               this.listMachine()
@@ -125,25 +126,27 @@
         })
       },
 
-       // 删除开发人员
+      // 删除开发人员
       async delMachine(param) {
         this.listLoading = false
         try {
-           let res = await this.$confirm('此操作将永久删除该选项, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+          const res = await this.$confirm('此操作将永久删除该选项, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
           }).catch(() => {
-             this.$message.error('已取消操作！ ')
-        })
-        if (res === "confirm"){
-          const res = await apiDelMachine(param)
-          this.listMachine()
-        }
+            this.$message.error('已取消操作！ ')
+          })
+          if (res === 'confirm') {
+            await apiDelMachine(param)
+            this.listMachine()
+          } else {
+            this.$message.log('已取消操作!')
+          }
         } catch (e) {
           this.$message.error('服务器删除错误 ' + e)
         }
-      },
+      }
 
     }
   }

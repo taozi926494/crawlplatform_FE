@@ -1,7 +1,6 @@
 import request from '@/utils/request'
 const querystring = require('querystring')
 
-
 // 获取所有开发人员列表
 export function apiListDevelopers() {
   return new Promise((resolve, reject) => {
@@ -52,8 +51,6 @@ export function apiDelDeveloper(developer_name) {
   })
 }
 
-
-
 // 编辑开发人员
 export function apiEditDeveloper(developer) {
   return new Promise((resolve, reject) => {
@@ -64,7 +61,7 @@ export function apiEditDeveloper(developer) {
         'id': developer.id,
         'developer_name': developer.developer_name,
         'developer_role': developer.developer_role,
-        'developer_status': developer.developer_status,
+        'developer_status': developer.developer_status
       }
     }).then((res) => {
       resolve(res)
@@ -73,6 +70,3 @@ export function apiEditDeveloper(developer) {
     })
   })
 }
-
-
-
