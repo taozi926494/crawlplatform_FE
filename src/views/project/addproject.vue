@@ -34,21 +34,39 @@
       </el-radio-group>
     </el-form-item>
 
-    <el-form-item v-if="form.is_msd=='0'" label="爬虫文件包">
-      <input type="file" id="egg" name="egg">
-      <div slot="tip" class="el-upload__tip"></div>
+    <el-form-item v-if="form.is_msd=='0'" label="爬虫文件包" label-width="200px">
+       <el-upload 
+        action= '#'
+        accept=".egg"
+        :on-exceed="exceedFile"
+        :on-change="fileChange"
+        :on-success="filesuccess"
+        :file-list="fileList"
+        :limit="1"
+        multiple
+        drag>
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+      </el-upload>
     </el-form-item>
 
-    <el-form-item v-if="form.is_msd=='1'" label="主爬虫文件包">
-      <input type="file" id="master_egg" name="master_egg">
-      <div slot="tip" class="el-upload__tip">请使用 scrapyd-client 去生成egg文件, 生成语句为: scrapyd-deploy --build-egg output.egg</div>
+    <el-form-item v-if="form.is_msd=='1'" label="爬虫文件包" label-width="200px" >
+      <el-upload 
+        action= '#'
+        accept=".egg"
+        :on-exceed="exceedFile"
+        :on-change="fileChange"
+        :on-success="filesuccess"
+        :file-list="fileList"
+        :limit="2"
+        multiple
+        drag>
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip" slot="tip">支持多文件同时上传, 将主、从爬虫文件拖拽此处！<br/>
+         *主爬虫文件必须包含 master 字符串, 从爬虫文件必须包含 slave 字符串</div>
+      </el-upload>
     </el-form-item>
-
-      <el-form-item   v-if="form.is_msd=='1'" label="从爬虫文件包">
-      <input type="file" id="slave_egg" name="slave_egg">
-      <div slot="tip" class="el-upload__tip">请使用 scrapyd-client 去生成egg文件, 生成语句为: scrapyd-deploy --build-egg output.egg</div>
-    </el-form-item>
-
     <p>scrapyd-deploy -p 项目名称 --build-egg=自我命名项目.egg</p>
 
   </el-form>
@@ -72,6 +90,7 @@ export default {
     }
 
     return {
+      fileList: [],
       developer_list: [],
       form: {
         project_name: null,
@@ -79,7 +98,9 @@ export default {
         for_project: null,
         applicant: null,
         is_msd: 1,
-        developers: []
+        developers: [],
+        files: []
+
       },
       formRules: {
         project_name: [{ required: true, trigger: 'blur', validator: validateProjName }],
@@ -101,6 +122,28 @@ export default {
   },
 
   methods: {
+    // 文件超出个数限制时的钩子
+    exceedFile(files, fileList) {
+      this.$notify.warning({
+        title: '警告',
+        message: '文件数量过多！'
+      })
+    },
+
+    // 文件状态改变时的钩子
+    fileChange(file, fileList) {
+      var flag = false
+      for (const i of fileList) {
+        if (i.name === file.raw.name) {
+          flag = true
+        }
+      }
+      if (!flag) {
+        fileList.push({ name: file.raw.name })
+      }
+      this.form.files.push(file.raw)
+    },
+
     async listDevelopers() {
       try {
         const res = await apiListDevelopers()
@@ -129,7 +172,7 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           // 单机爬虫格式
-          var formData = new FormData()
+          const formData = new FormData()
           if (this.form.is_msd === 0) {
             this.loading = true
             formData.append('is_msd', this.form.is_msd)
@@ -138,27 +181,21 @@ export default {
             formData.append('for_project', this.form.for_project)
             formData.append('applicant', this.form.applicant)
             formData.append('developers', this.form.developers.join(','))
-            var egg = document.getElementById('egg').files[0]
-            if (this.validEgg(egg)) {
-              formData.append('egg', egg)
-              // 发起上传请求
-              var _self = this
-              upload.post('/addproject', formData).then((response) => {
-                _self.loading = false
-                if (response.status === 'success') {
-                  _self.$router.push({ path: '/project/all' })
-                }
-              }).catch(function(error) {
-                _self.loading = false
-                console.log(error)
-              })
-            } else {
-              this.loading = false
-              this.$message({
-                message: '请上传对应的.egg文件',
-                type: 'warning'
-              })
+            formData.append('egg', '')
+            for (var i = 0; i < this.form.files.length; i++) {
+              formData.set('egg', this.form.files[i])
             }
+            // 发起上传请求
+            var _self = this
+            upload.post('/addproject', formData).then((response) => {
+              _self.loading = false
+              if (response.status === 'success') {
+                _self.$router.push({ path: '/project/all' })
+              }
+            }).catch(function(error) {
+              _self.loading = false
+              console.log(error)
+            })
           } else {
             this.loading = true
             formData.append('is_msd', this.form.is_msd)
@@ -167,29 +204,25 @@ export default {
             formData.append('for_project', this.form.for_project)
             formData.append('applicant', this.form.applicant)
             formData.append('developers', this.form.developers.join(','))
-            var master_egg = document.getElementById('master_egg').files[0]
-            var slave_egg = document.getElementById('slave_egg').files[0]
-            if (this.validEgg(master_egg) && this.validEgg(slave_egg)) {
-              formData.append('master_egg', master_egg)
-              formData.append('slave_egg', slave_egg)
-              // 发起上传请求
-              _self = this
-              upload.post('/addproject', formData).then((response) => {
-                _self.loading = false
-                if (response.status === 'success') {
-                  _self.$router.push({ path: '/project/all' })
-                }
-              }).catch(function(error) {
-                _self.loading = false
-                console.log(error)
-              })
-            } else {
-              this.loading = false
-              this.$message({
-                message: '请上传对应的.egg文件',
-                type: 'warning'
-              })
+            formData.append('master_egg', '')
+            formData.append('slave_egg', '')
+            for (var j = 0; j < this.form.files.length; j++) {
+              if (this.form.files[j].name.indexOf('master') !== -1) {
+                formData.set('master_egg', this.form.files[j])
+              } else {
+                formData.set('slave_egg', this.form.files[j])
+              }
             }
+            _self = this
+            upload.post('/addproject', formData).then((response) => {
+              _self.loading = false
+              if (response.status === 'success') {
+                _self.$router.push({ path: '/project/all' })
+              }
+            }).catch(function(error) {
+              _self.loading = false
+              console.log(error)
+            })
           }
         } else {
           console.log('err submit')
@@ -207,4 +240,34 @@ export default {
 
 }
 
+</style>
+<style>
+.el-upload-dragger{
+  position: absolute;
+  left: -50px;
+  background-color:#f6f6f6;
+  width: 220px !important;
+  height: 100px !important;
+  position: relative;
+
+}
+.el-icon-upload{
+  display: none;
+}
+.el-upload__text{
+  padding-top: 15% 
+}
+.el-upload__tip{
+  font-weight: bolder;
+  position: relative;
+  left: -50px;
+}
+.el-upload-list__item-name{
+  color:dodgerblue;
+}
+.el-upload-list{
+  position: relative;
+  left: -50px;
+  width: 20%;
+}
 </style>
