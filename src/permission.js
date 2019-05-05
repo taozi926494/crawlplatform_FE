@@ -47,6 +47,9 @@ const whiteList = ['/login', '/visual',]// no redirect whitelist
 //   }
 // })
 
+
+
+
 // router.afterEach(() => {
 //   NProgress.done() // finish progress bar
 // })
