@@ -68,7 +68,7 @@
 
 <script>
 import { isvalidUsername, isvalidEmail } from '@/utils/validate'
-import service from '@/utils/request'
+
 export default {
   name: 'login',
   data() {

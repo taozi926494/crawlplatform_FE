@@ -26,46 +26,46 @@
     <el-card class="box-card spider">
       <div slot="header" class="clearfix">
         <span>爬虫运行情况</span>
-        <el-button style="float: right; padding: 3px 0" type="text">编辑项目信息</el-button>
+        <el-button style="float: right; padding: 3px 0" type="text"></el-button>
       </div>
 
       <el-table :data="project_info.spiders" element-loading-text="Loading" border fit highlight-current-row>
         
-        <el-table-column align="center" label='蜘蛛id' width="65">
-          <template slot-scope="scope">
-            {{scope.row.spider_id}}
-          </template>
+        <el-table-column align="center" label='序号' width="65" type="index">
         </el-table-column>
-        <el-table-column label="蜘蛛名称（英文）">
+
+        <el-table-column label="蜘蛛名称">
           <template slot-scope="scope">
             {{scope.row.spider_name}}
           </template>
-        </el-table-column><el-table-column label="蜘蛛名称（中文）">
-          <template slot-scope="scope">
-            {{scope.row.spider_alias}}
-          </template>
         </el-table-column>
-        </el-table-column><el-table-column label="调度类型">
+
+        <el-table-column label="调度类型"  width="250" >
           <template slot-scope="scope">
-            <span>{{scope.row.circle_type}}</span>
+            <span>{{scope.row.circle_type}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             <el-button size="mini" v-if="scope.row.circle_type != 'periodic'" @click="showSchedulerForm(scope.row.spider_name)">添加调度</el-button>
           </template>
         </el-table-column>
-        <el-table-column label="最近运行时间" width="155" align="center">
+
+        <el-table-column label="最近运行时间" width="250" >
           <template slot-scope="scope">
             <span>{{scope.row.last_run_time}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="最近运行状态" width="110" align="center">
+
+        <el-table-column label="最近运行状态" width="150" >
           <template slot-scope="scope">
             <el-tag v-if="scope.row.circle_type != null">{{scope.row.last_run_status}}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="230" align="center">
+
+        <el-table-column label="操作" width="350">
           <template slot-scope="scope">
             <el-button size="mini" @click="runOnce(project_info.project_id, scope.row.spider_name)">运行</el-button>
-              <el-button v-if="scope.row.job_exec_id !== null" size="mini" @click="viewMasterLog(project_info.project_id, scope.row.job_exec_id)">主log</el-button>
-              <el-button v-if="scope.row.job_exec_id !== null" size="mini" @click="viewSlaveLog(project_info.project_id, scope.row.job_exec_id)">从log</el-button>
+            <el-button v-if="scope.row.last_run_status=='RUNNING'" size="mini" @click="cancelspider(project_info.project_id, project_info.project_name, scope.$index)">取消</el-button>
+            <el-button v-if="project_info.is_msd=='0' && scope.row.job_exec_id !== null" size="mini" @click="viewMasterLog(project_info.project_id, scope.row.job_exec_id)">&nbsp;&nbsp;log&nbsp;</el-button>
+            <el-button v-if="project_info.is_msd=='1' && scope.row.job_exec_id !== null" size="mini" @click="viewMasterLog(project_info.project_id, scope.row.job_exec_id)">主log</el-button>
+            <el-button v-if="project_info.is_msd=='1' && scope.row.job_exec_id !== null" size="mini" @click="viewSlaveLog(project_info.project_id, scope.row.job_exec_id)">从log</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -305,7 +305,6 @@
           </select>
         </el-form-item>
 
-
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -336,15 +335,16 @@
 </style>
 
 <script>
-  import { getProjectInfo, delProject } from '@/api/project'
+  import { apiGetProjectInfo, delProject } from '@/api/project'
   import { addScheduler } from '@/api/spider'
-  import { runOnce } from '@/api/spider'
+  import { runOnce, apiCancelspider } from '@/api/spider'
   import { getMasterLog, getSlaveLog } from '@/api/spider'
 
   export default {
     data() {
       return {
         project_info: {
+          is_msd: null,
           project_id: null,
           project_name: null,
           project_alias: null,
@@ -378,12 +378,16 @@
     },
     methods: {
       // 获取工程信息
-      getProjectInfo: function() {
-        getProjectInfo(this.$route.params.name).then(response => {
-          this.project_info = response.data
-          this.schedulerForm.project_id = response.data.project_id
-        })
+      async getProjectInfo() {
+        try {
+          const res = await apiGetProjectInfo(this.$route.params.name)
+          this.project_info = res.data
+          this.schedulerForm.project_id = res.data.project_id
+        } catch (e) {
+          this.$message.error('获取信息错误 ' + e)
+        }
       },
+
       // 弹出调度窗口
       showSchedulerForm: function(spider_name) {
         this.schedulerForm.spider_name = spider_name
@@ -397,7 +401,7 @@
           this.loading = false
           this.$message('添加调度成功')
           // 重新再获取一次工程信息
-          getProjectInfo(this.$route.params.name).then(response => {
+          this.getProjectInfo(this.$route.params.name).then(response => {
             this.project_info = response.data
             this.schedulerForm.project_id = response.data.project_id
           }).catch(err => {
@@ -406,6 +410,7 @@
           })
         })
       },
+
       // 单次运行
       runOnce: function(project_id, spider_name) {
         this.loading = true
@@ -419,6 +424,19 @@
           }
         })
       },
+
+      // 取消爬虫
+      async cancelspider(project_id, project_name, excute_job_index) {
+        try {
+          this.loading = true
+          await apiCancelspider(project_id, project_name, excute_job_index)
+          this.loading = false
+          this.getProjectInfo()
+        } catch (e) {
+          this.$message.error('取消爬虫错误 ' + e)
+        }
+      },
+
       // 查看主爬虫log
       viewMasterLog: function(project_id, job_exec_id) {
         this.dialogLogVisible = true
@@ -427,6 +445,7 @@
           this.log = response.log
         })
       },
+
       // 查看从爬虫log
       viewSlaveLog: function(project_id, job_exec_id) {
         this.dialogLogVisible = true
@@ -435,6 +454,7 @@
           this.log = response.log
         })
       },
+
       // 删除项目
       delProject: function() {
         this.$confirm('此操作将永久删除该项目, 是否继续?', '提示', {

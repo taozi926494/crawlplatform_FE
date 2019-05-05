@@ -57,19 +57,19 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: '/project/all',
     name: '爬虫项目管理',
-    meta: { title: '爬虫项目管理', icon: 'example' },
+    meta: { title: '爬虫项目管理', icon: 'project_manage' },
     children: [
       {
         path: 'all',
         name: '所有项目',
         component: () => import('@/views/project/index'),
-        meta: { title: '所有项目', icon: 'table', roles: ['leader'] }
+        meta: { title: '所有项目', icon: 'list', roles: ['leader'] }
       },
       {
         path: 'addproject',
         name: '添加项目',
         component: () => import('@/views/project/addproject'),
-        meta: { title: '添加项目', icon: 'tree', roles: ['leader'] }
+        meta: { title: '添加项目', icon: 'add_project', roles: ['leader'] }
       },
       {
         path: 'info/:name',
@@ -84,14 +84,20 @@ export const asyncRouterMap = [
     path: '/machine',
     component: Layout,
     redirect: '/machine/all',
-    name: '服务器',
-    meta: { title: '服务器', icon: 'server' },
+    name: '参数配置',
+    meta: { title: '参数配置', icon: 'param' },
     children: [
       {
         path: 'all',
-        name: '服务器管理',
+        name: '服务器',
         component: () => import('@/views/machine/index'),
-        meta: { title: '服务器管理', icon: 'table', roles: ['leader'] }
+        meta: { title: '服务器', icon: 'server', roles: ['leader'] }
+      },
+      {
+        path: 'developer',
+        name: '开发人员',
+        component: () => import('@/views/developers/index'),
+        meta: { title: '开发人员', icon: 'add_deverper', roles: ['leader'] }
       }
     ]
   },

@@ -8,13 +8,19 @@ export function getAllProject() {
   })
 }
 
-export function getProjectInfo(project_name) {
-  return request({
-    url: '/projectinfo',
-    method: 'get',
-    params: {
-      project_name
-    }
+export function apiGetProjectInfo(project_name) {
+  return new Promise((resolve, reject) => {
+    request({
+      url: '/projectinfo',
+      method: 'get',
+      params: {
+        project_name
+      }
+    }).then((res) => {
+      resolve(res)
+    }).catch((e) => {
+      reject(e)
+    })
   })
 }
 

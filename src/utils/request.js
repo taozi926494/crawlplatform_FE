@@ -57,7 +57,7 @@ service.interceptors.response.use(
   error => {
     console.log('err' + error)// for debug
     Message({
-      message: error.msg,
+      message: '错误的HTTP响应码 ' + error,
       type: 'error',
       duration: 5 * 1000
     })
