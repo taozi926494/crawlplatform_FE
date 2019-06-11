@@ -1,5 +1,6 @@
-import { regist, login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { regist, login, getInfo } from '@/api/user'
+import { getToken, setToken, removeToken, getRoles } from '@/utils/auth'
+import { removeAllCookies } from '../../utils/auth'
 
 const user = {
   state: {
@@ -7,7 +8,7 @@ const user = {
     name: '',
     avatar: '',
     email: '',
-    roles: []
+    roles: getRoles()
   },
 
   mutations: {
@@ -86,16 +87,9 @@ const user = {
 
     // 登出
     LogOut({ commit, state }) {
-      return new Promise((resolve, reject) => {
-        logout(state.token).then(() => {
-          commit('SET_TOKEN', '')
-          commit('SET_ROLES', [])
-          removeToken()
-          resolve()
-        }).catch(error => {
-          reject(error)
-        })
-      })
+      removeAllCookies()
+      const logoutUrl = process.env.BACKEND_URL + '/logout/'
+      window.location = logoutUrl
     },
 
     // 前端 登出

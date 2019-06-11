@@ -23,19 +23,19 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="项目开发者" width="250px">
+      <el-table-column label="项目开发者" width="170px">
         <template slot-scope="scope">
           <el-tag style="margin-left: 10px;" v-for="developer_name, index in scope.row.developers.split(',')" :key="index" type="success">{{developer_name}}</el-tag>
         </template>
       </el-table-column>
 
-       <el-table-column  label='发布时间' width="200">
+      <el-table-column label="主题分类" width="160px">
         <template slot-scope="scope">
-          {{scope.row.create_time}}
+          {{ scope.row.project_cate }}
         </template>
       </el-table-column>
 
-      <el-table-column  label='蜘蛛类型' width="155">
+      <el-table-column  label='项目类型' width="155">
         <template slot-scope="scope">
           <span  v-if="Number(scope.row.is_msd) == 0">
             单机
@@ -46,7 +46,13 @@
         </template>
       </el-table-column>
 
-       <el-table-column align="center" label="操作"  width="155">
+      <el-table-column  label='发布时间' width="170">
+        <template slot-scope="scope">
+          {{scope.row.create_time}}
+        </template>
+      </el-table-column>
+
+      <el-table-column align="center" label="操作"  width="155">
         <template slot-scope="scope">
           <a style="color: #409EFF" :href="'#/project/info/' + scope.row.project_name">查看详情</a>
          

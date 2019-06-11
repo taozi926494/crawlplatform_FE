@@ -4,11 +4,11 @@ import store from '../store'
 
 // 创建axios实例
 const service = axios.create({
-  baseURL: process.env.BASE_API, // api的base_url
+  baseURL: process.env.IP_AGENCY_URL,
   timeout: 15000, // 请求超时时间
-  headers: { 'Content-Type': 'multipart/form-data' }
+  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  withCredentials: true // 跨域session
 })
-
 // respone拦截器
 service.interceptors.response.use(
   response => {
@@ -18,7 +18,7 @@ service.interceptors.response.use(
     const res = response.data
     if (res.code !== 200) {
       Message({
-        message: '服务器响应错误: ' + res.msg,
+        message: res.msg,
         type: 'error',
         duration: 5 * 1000
       })
@@ -35,25 +35,18 @@ service.interceptors.response.use(
           })
         })
       }
-      return Promise.reject(res.msg)
+      return Promise.reject('error')
     } else {
       return response.data
     }
   },
   error => {
-    if (error.msg) {
-      Message({
-        message: error.msg,
-        type: 'error',
-        duration: 5 * 1000
-      })
-    } else {
-      Message({
-        message: error,
-        type: 'error',
-        duration: 5 * 1000
-      })
-    }
+    console.log('err' + error)// for debug
+    Message({
+      message: '错误的HTTP响应码 ' + error,
+      type: 'error',
+      duration: 5 * 1000
+    })
     return Promise.reject(error)
   }
 )

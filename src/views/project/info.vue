@@ -18,6 +18,9 @@
         <el-col :span="12"><strong>需求项目: </strong>{{project_info.for_project}}</el-col>
         <el-col :span="12"><strong>申请开发人: </strong>{{project_info.applicant}}</el-col>
       </el-row>
+       <el-row>
+        <el-col :span="12"><strong>主题分类: </strong>{{ project_info.project_cate }}</el-col>
+      </el-row>
       <el-row>
         <el-col :span="8" :offset="16"><el-button type="danger" @click="delProject"><i class="el-icon-delete el-icon--left"></i>删除项目</el-button></el-col>
       </el-row>

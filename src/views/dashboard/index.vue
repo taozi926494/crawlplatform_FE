@@ -16,19 +16,25 @@
         </template>
       </el-table-column>
 
-       <el-table-column align="center" label='蜘蛛类型' width="150">
+       <el-table-column align="center" label='项目类型' width="160">
         <template slot-scope="scope">
           <span v-if="scope.row.is_msd=='1'">分布式</span>
           <span v-else>单机</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="最近运行时间" width="155" align="center">
+      <el-table-column align="center" label='主题分类' width="160">
+        <template slot-scope="scope">
+          <span>{{ scope.row.project_cate }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="最近运行时间" width="160" align="center">
         <template slot-scope="scope">
           <span>{{scope.row.last_run_time}}</span>
         </template>
       </el-table-column>
-      <el-table-column label="最近运行状态" width="150" align="center">
+      <el-table-column label="运行状态" width="160" align="center">
         <template slot-scope="scope">
           <el-tag>{{scope.row.last_run_status}}</el-tag>
           <span v-show="false">{{scope.row.last_run_status}}</span>
