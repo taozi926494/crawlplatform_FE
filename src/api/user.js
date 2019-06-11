@@ -15,7 +15,7 @@ export function regist(username, email, password) {
 
 export function login(username, password) {
   return request({
-    url: '/login',
+    url: '/sys/log',
     method: 'post',
     data: querystring.stringify({
       username,
@@ -35,9 +35,6 @@ export function getInfo(token) {
 export function logout() {
   return request({
     url: '/logout',
-    method: 'post',
-    data: querystring.stringify({
-      username: 'admin'
-    })
+    method: 'get'
   })
 }

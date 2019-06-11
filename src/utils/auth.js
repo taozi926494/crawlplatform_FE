@@ -13,3 +13,23 @@ export function setToken(token) {
 export function removeToken() {
   return Cookies.remove(TokenKey)
 }
+
+export function getUsername() {
+  return Cookies.get('username')
+}
+
+export function getRoles() {
+  let roles = Cookies.get('roles')
+  if (roles) {
+    roles = roles.replace(/\\054/g, ',')
+    return roles.split(',')
+  } else {
+    return null
+  }
+}
+
+export function removeAllCookies() {
+  for (const key in Cookies.get()) {
+    Cookies.remove(key)
+  }
+}

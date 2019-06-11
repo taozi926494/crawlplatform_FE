@@ -27,6 +27,16 @@
       </el-checkbox-group>
     </el-form-item>
 
+    <el-form-item label="项目类型" prop="pro_type">
+      <el-radio-group v-model="form.pro_type">
+        <el-radio :label="0">{{ this.project_type[0] }}</el-radio>
+        <el-radio :label="1">{{ this.project_type[1] }}</el-radio>
+        <el-radio :label="2">{{ this.project_type[2] }}</el-radio>
+        <el-radio :label="3">{{ this.project_type[3] }}</el-radio>
+        <el-radio :label="4">{{ this.project_type[4] }}</el-radio>
+      </el-radio-group>
+    </el-form-item>
+
     <el-form-item label="蜘蛛类型" prop="is_msd">
       <el-radio-group v-model="form.is_msd">
         <el-radio :label="1">分布式</el-radio>
@@ -40,7 +50,6 @@
         accept=".egg"
         :on-exceed="exceedFile"
         :on-change="fileChange"
-        :on-success="filesuccess"
         :file-list="fileList"
         :limit="1"
         multiple
@@ -56,7 +65,6 @@
         accept=".egg"
         :on-exceed="exceedFile"
         :on-change="fileChange"
-        :on-success="filesuccess"
         :file-list="fileList"
         :limit="2"
         multiple
@@ -70,7 +78,7 @@
     <p>scrapyd-deploy -p 项目名称 --build-egg=自我命名项目.egg</p>
 
   </el-form>
-    <el-button @click="addProject">添加</el-button>
+  <el-button @click="addProject">添加</el-button>
   </div>
 </template>
 
@@ -88,15 +96,16 @@ export default {
         callback()
       }
     }
-
     return {
       fileList: [],
       developer_list: [],
+      project_type: ['开放平台', '公文公告', '餐饮', '舆情', '其他'],
       form: {
         project_name: null,
         project_alias: null,
         for_project: null,
         applicant: null,
+        pro_type: 1,
         is_msd: 1,
         developers: [],
         files: []
@@ -156,6 +165,7 @@ export default {
         this.$message.error('开发人员列表获取错误 ' + e)
       }
     },
+
     validEgg: function(eggfile) {
       if (eggfile === undefined) {
         return false
@@ -180,6 +190,7 @@ export default {
             formData.append('project_alias', this.form.project_alias)
             formData.append('for_project', this.form.for_project)
             formData.append('applicant', this.form.applicant)
+            formData.append('pro_type', this.project_type[this.form.pro_type])
             formData.append('developers', this.form.developers.join(','))
             formData.append('egg', '')
             for (var i = 0; i < this.form.files.length; i++) {
@@ -203,6 +214,7 @@ export default {
             formData.append('project_alias', this.form.project_alias)
             formData.append('for_project', this.form.for_project)
             formData.append('applicant', this.form.applicant)
+            formData.append('pro_type', this.project_type[this.form.pro_type])
             formData.append('developers', this.form.developers.join(','))
             formData.append('master_egg', '')
             formData.append('slave_egg', '')

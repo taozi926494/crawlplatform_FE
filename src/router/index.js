@@ -9,22 +9,8 @@ Vue.use(Router)
 /* Layout */
 import Layout from '../views/layout/Layout'
 
-/**
-* hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
-* alwaysShow: true               if set true, will always show the root menu, whatever its child routes length
-*                                if not set alwaysShow, only more than one route under the children
-*                                it will becomes nested mode, otherwise not show the root menu
-* redirect: noredirect           if `redirect:noredirect` will no redirct in the breadcrumb
-* name:'router-name'             the name is used by <keep-alive> (must set!!!)
-* meta : {
-    title: 'title'               the name show in submenu and breadcrumb (recommend set)
-    icon: 'svg-name'             the icon show in the sidebar,
-  }
-**/
 export const constantRouterMap = [
-  { path: '/login', component: () => import('@/views/login/index'), hidden: true },
   { path: '/404', component: () => import('@/views/404'), hidden: true },
-  { path: '/visual', component: () => import('@/views/visual'), hidden: true },
   {
     path: '/',
     component: Layout,
@@ -47,8 +33,8 @@ export const asyncRouterMap = [
     name: 'dashboard',
     children: [{
       path: 'dashboard',
-      name: '爬虫运行状态',
-      meta: { title: '爬虫运行状态', icon: 'spider', roles: ['leader'] },
+      name: '运行状态',
+      meta: { title: '运行状态', icon: 'spider', roles: ['leader'] },
       component: () => import('@/views/dashboard/index')
     }]
   },
@@ -56,8 +42,8 @@ export const asyncRouterMap = [
     path: '/project',
     component: Layout,
     redirect: '/project/all',
-    name: '爬虫项目管理',
-    meta: { title: '爬虫项目管理', icon: 'project_manage' },
+    name: '项目管理',
+    meta: { title: '项目管理', icon: 'project_manage' },
     children: [
       {
         path: 'all',
@@ -102,6 +88,42 @@ export const asyncRouterMap = [
     ]
   },
   {
+    path: '/visua',
+    component: Layout,
+    children: [
+      {
+        path: 'visual',
+        name: 'visual',
+        component: () => import('@/views/visual'),
+        meta: { title: '可视化', icon: 'visual', roles: ['leader'] }
+      }
+    ]
+  },
+  {
+    path: '/log',
+    component: Layout,
+    children: [
+      {
+        path: 'log',
+        name: 'log',
+        component: () => import('@/views/log/index'),
+        meta: { title: '项目监控', icon: 'log', roles: ['leader'] }
+      }
+    ]
+  },
+  {
+    path: '/agency',
+    component: Layout,
+    children: [
+      {
+        path: 'agency',
+        name: 'agency',
+        component: () => import('@/views/ipagency/index'),
+        meta: { title: '代理管理', icon: 'ip', roles: ['leader'] }
+      }
+    ]
+  },
+  {
     path: '/user',
     component: Layout,
     children: [
@@ -113,6 +135,5 @@ export const asyncRouterMap = [
       }
     ]
   },
-
   { path: '*', redirect: '/404', hidden: true }
 ]

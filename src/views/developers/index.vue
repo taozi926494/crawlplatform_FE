@@ -45,7 +45,7 @@
       <el-table-column label="操作"  align="center">
         <template slot-scope="scope">
           <el-button size="mini"  @click="editdeveloperForm = scope.row; dialogVisible = true;">编辑</el-button>
-            <el-button  slot="reference" size="mini" @click="delDevelopers(scope.row.developer_name)">删除</el-button>
+          <el-button  slot="reference" size="mini" @click="delDevelopers(scope.row.developer_name)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
