@@ -60,6 +60,15 @@
       </el-table-column>
 
     </el-table>
+    <div class="pagination">
+      <el-pagination
+        background
+        @current-change="handleCurrentChange"
+        layout="total, prev, pager, next, jumper"
+        :page-size="pageSzie"
+        :total="total_num">
+      </el-pagination>
+    </div>
   </div>
 </template>
 
@@ -71,20 +80,36 @@ export default {
   data() {
     return {
       list: null,
-      listLoading: true
+      listLoading: true,
+      pageIndex: 1,
+      pageSzie: 8,
+      total_num: null,
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
+    handleCurrentChange(val) {
+      this.pageIndex = val
+      this.fetchData()
+    },
     fetchData() {
       this.listLoading = true
-      getAllProject().then(response => {
-        this.list = response.data
+      getAllProject(this.pageIndex, this.pageSzie).then(response => {
+        this.total_num = response.data.total_num
+        this.list = response.data.data
+        console.log(this.list)
         this.listLoading = false
       })
     }
   }
 }
 </script>
+</script>
+<style lang="scss" scoped>
+.pagination{
+  margin-top: 50px;
+}
+
+</style>

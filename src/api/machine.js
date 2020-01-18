@@ -35,14 +35,39 @@ export function apiAddmachine(machine) {
 }
 
 // 删除服务器
-export function apiDelMachine(server_ip) {
+export function apiDelMachine(id) {
   return new Promise((resolve, reject) => {
     request({
       url: 'delmachine',
       method: 'get',
       params: {
-        server_ip
+        id
       }
+    }).then((res) => {
+      resolve(res)
+    }).catch((e) => {
+      reject(e)
+    })
+  })
+}
+
+// {
+//   id: machine.id,
+//   server_ip: machine.server_ip,
+//   server_status: machine.server_status,
+//   is_master: machine.is_master,
+//   new_id: machine.new_id,
+//   new_server_ip: machine.new_server_ip,
+//   new_server_status: machine.new_server_status,
+//   new_is_master: machine.new_is_master
+// }
+// 编辑服务器
+export function apiEditMachine(machine) {
+  return new Promise((resolve, reject) => {
+    request({
+      url: 'editmachine',
+      method: 'post',
+      data: querystring.stringify(machine)
     }).then((res) => {
       resolve(res)
     }).catch((e) => {

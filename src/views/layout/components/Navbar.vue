@@ -4,7 +4,7 @@
     <breadcrumb></breadcrumb>
     <el-dropdown class="avatar-container" trigger="click">
       <div class="avatar-wrapper">
-        <img class="user-avatar" :src="avatar+'?imageView2/1/w/80/h/80'">
+        <img class="user-avatar" src="./../../../assets/user.png">
         <i class="el-icon-caret-bottom"></i>
       </div>
       <el-dropdown-menu class="user-dropdown" slot="dropdown">
@@ -16,9 +16,9 @@
             角色: <el-tag v-for='role in roles' :key='role'>{{role}}</el-tag>
           </el-dropdown-item>
         </router-link>
-        <el-dropdown-item>
+        <!-- <el-dropdown-item>
           <span @click="logout" style="display:block;">退出登录</span>
-        </el-dropdown-item>
+        </el-dropdown-item> -->
       </el-dropdown-menu>
     </el-dropdown>
   </el-menu>
@@ -80,8 +80,9 @@ export default {
       margin-top: 5px;
       position: relative;
       .user-avatar {
-        width: 40px;
-        height: 40px;
+        padding-top: 5px;
+        width: 30px;
+        height: 30px;
         border-radius: 10px;
       }
       .el-icon-caret-bottom {

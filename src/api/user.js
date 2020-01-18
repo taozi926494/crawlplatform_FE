@@ -38,3 +38,16 @@ export function logout() {
     method: 'get'
   })
 }
+export function getCollectDataInfo(from) {
+  return request({
+    url: 'collect_data_info',
+    method: 'post',
+    data: querystring.stringify({
+      manager_person: from['manager_person'],
+      start_date: from['start_date'],
+      end_date: from['end_date'],
+      pageIndex: from['pageIndex'],
+      pageSzie: from['pageSize']
+    })
+  })
+}

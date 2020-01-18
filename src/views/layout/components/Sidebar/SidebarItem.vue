@@ -1,10 +1,10 @@
 <template>
   <div>
     <div style="height:60px; color: #ffffff; font-size: 14px; line-height:60px;">
-      <img src="../../../../assets/cetclogo.png" style="display:inline-block; width: 60px; margin: -2px 5px;">
-      <strong style="font-family: '微软雅黑'; font-size:20px;">爬虫调度管理平台</strong>
+      <img src="../../../../assets/cetclogo.png" style="display:inline-block; width: 50px; margin: -1px 4px;">
+      <strong style="font-family: '微软雅黑'; font-size:16px;">互联网采集调度管理平台</strong>
     </div>
-    <el-menu :defaultOpeneds="['/project', '/machine']">
+    <el-menu :defaultOpeneds="['/project', '/machine']" :default-active='$route.path'>
       <template v-for="item in routes" v-if="!item.hidden&&item.children" >
         <router-link v-if="hasOneShowingChildren(item.children) && !item.children[0].children&&!item.alwaysShow" :to="item.path+'/'+item.children[0].path"
           :key="item.children[0].name">

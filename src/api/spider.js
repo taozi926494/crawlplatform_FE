@@ -2,30 +2,33 @@ import request from '@/utils/request'
 const querystring = require('querystring')
 
 // 获取所有蜘蛛运行情况
-export function getAllSpider() {
+export function getAllSpider(pageIndex, pageSize) {
   return request({
     url: '/allspider',
-    method: 'get'
+    method: 'get',
+    params: {pageIndex,pageSize}
   })
 }
 
-export function addScheduler(spider) {
+export function addScheduler(form) {
+  form['selectedmonths'] = form['selectedmonths'].length == 0 ? null: form['selectedmonths'].join(',');
+  form['selecteddays'] = form['selecteddays'].join(',').length == 0 ? null:  form['selecteddays'].join(',');
+  form['selectedhours'] = form['selectedhours'].join(',').length == 0 ? null:   form['selectedhours'].join(',');
+  form['selectedminutes'] = form['selectedminutes'].join(',').length == 0 ? null:  form['selectedminutes'].join(',');  
   return request({
     url: '/addscheduler',
     method: 'post',
-    data: querystring.stringify({
-      project_id: spider.project_id,
-      spider_name: spider.spider_name,
-      spider_arguments: spider.spider_arguments,
-      priority: spider.priority,
-      daemon: spider.daemon,
-      cron_month: spider.cron_month,
-      cron_day_of_month: spider.cron_day_of_month,
-      cron_day_of_week: spider.cron_day_of_week,
-      cron_hour: spider.cron_hour,
-      cron_minutes: spider.cron_minutes,
-      run_type: 'periodic'
-    })
+    data: querystring.stringify(form)
+  })
+}
+
+export function delScheduler(job_instance_id) {
+  return request({
+    url: '/delscheduler',
+    method: 'get',
+    params: {
+      job_instance_id
+    }
   })
 }
 
@@ -43,7 +46,7 @@ export function runOnce(project_id, spider_name) {
   })
 }
 
-export function apiCancelspider(project_id, project_name, index) {
+export function apiCancelspider(project_id, project_name, job_instance_id) {
   return new Promise((resolve, reject) => {
     request({
       url: '/cancelspider',
@@ -51,7 +54,7 @@ export function apiCancelspider(project_id, project_name, index) {
       data: querystring.stringify({
         project_id: project_id,
         project_name: project_name,
-        index: index
+        job_instance_id: job_instance_id
       })
     }).then((res) => {
       resolve(res)

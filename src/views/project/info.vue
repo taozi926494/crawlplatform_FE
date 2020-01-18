@@ -6,12 +6,12 @@
     element-loading-background="rgba(255, 255, 255, 0.8">
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span>{{project_info.project_name}}  {{project_info.project_alias}}</span>
-        <el-button style="float: right; padding: 3px 0" type="text">编辑项目信息</el-button>
+        <span>{{project_info.project_name}} - {{project_info.project_alias}}</span>
+        <el-button @click="clickEditInfo" style="float: right; padding: 3px 0" type="text">编辑项目信息</el-button>
       </div>
 
       <el-row>
-        <el-col :span="12"><strong>创建时间: </strong>{{project_info.create_time}}</el-col>
+        <el-col :span="12"><strong>更新时间: </strong>{{project_info.create_time}}</el-col>
         <el-col :span="12"><strong>开发人员: </strong><el-tag style="margin-left: 5px;" v-for="developer_name, index in project_info.developers.split(',')" :key="index" type="success">{{developer_name}}</el-tag></el-col>
       </el-row>
       <el-row>
@@ -20,6 +20,7 @@
       </el-row>
        <el-row>
         <el-col :span="12"><strong>主题分类: </strong>{{ project_info.project_cate }}</el-col>
+        <el-col :span="12"><strong>蜘蛛类型: </strong>{{ projectTpye[project_info.is_msd] }}</el-col>
       </el-row>
       <el-row>
         <el-col :span="8" :offset="16"><el-button type="danger" @click="delProject"><i class="el-icon-delete el-icon--left"></i>删除项目</el-button></el-col>
@@ -37,7 +38,7 @@
         <el-table-column align="center" label='序号' width="65" type="index">
         </el-table-column>
 
-        <el-table-column label="蜘蛛名称">
+        <el-table-column label="蜘蛛名称" >
           <template slot-scope="scope">
             {{scope.row.spider_name}}
           </template>
@@ -47,6 +48,13 @@
           <template slot-scope="scope">
             <span>{{scope.row.circle_type}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
             <el-button size="mini" v-if="scope.row.circle_type != 'periodic'" @click="showSchedulerForm(scope.row.spider_name)">添加调度</el-button>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="cron表达式" :render-header="renderHeader">
+          <template slot-scope="scope">
+            <span v-if="scope.row.circle_type === 'periodic'">{{ scope.row.cron }}</span>
+            <span v-else>无</span>
           </template>
         </el-table-column>
 
@@ -65,260 +73,101 @@
         <el-table-column label="操作" width="350">
           <template slot-scope="scope">
             <el-button size="mini" @click="runOnce(project_info.project_id, scope.row.spider_name)">运行</el-button>
-            <el-button v-if="scope.row.last_run_status=='RUNNING'" size="mini" @click="cancelspider(project_info.project_id, project_info.project_name, scope.$index)">取消</el-button>
+            <el-button v-if="scope.row.last_run_status=='RUNNING'" size="mini" @click="cancelspider(project_info.project_id, project_info.project_name, scope.row.job_instance_id)">取消</el-button>
             <el-button v-if="project_info.is_msd=='0' && scope.row.job_exec_id !== null" size="mini" @click="viewMasterLog(project_info.project_id, scope.row.job_exec_id)">&nbsp;&nbsp;log&nbsp;</el-button>
             <el-button v-if="project_info.is_msd=='1' && scope.row.job_exec_id !== null" size="mini" @click="viewMasterLog(project_info.project_id, scope.row.job_exec_id)">主log</el-button>
             <el-button v-if="project_info.is_msd=='1' && scope.row.job_exec_id !== null" size="mini" @click="viewSlaveLog(project_info.project_id, scope.row.job_exec_id)">从log</el-button>
+            <el-button type="danger" size="mini" v-if="scope.row.circle_type == 'periodic'" @click="del_scheduler(scope.row.job_instance_id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-card>
 
-    <el-dialog title="添加调度" :visible.sync="dialogFormVisible">
-      <el-form :model="schedulerForm">
-        <el-form-item label="工程id" :label-width="formLabelWidth">
-          <el-input v-model="schedulerForm.project_id" auto-complete="off" :disabled="true"></el-input>
+    <el-dialog title="编辑项目" :visible.sync="editProjectInfodialog">
+      <el-form :model="editProjectIinfoForm" :rules="formRules">
+        <el-form-item label="项目英文名称" :label-width="formLabelWidth" prop="project_name">
+          <el-input v-model="editProjectIinfoForm.project_name" auto-complete="off" :disabled="true"></el-input>
         </el-form-item>
 
-        <el-form-item label="蜘蛛英文名称" :label-width="formLabelWidth">
-          <el-input v-model="schedulerForm.spider_name" auto-complete="off" :disabled="true"></el-input>
+        <el-form-item label="项目中文名称" :label-width="formLabelWidth" prop="project_alias">
+          <el-input v-model="editProjectIinfoForm.project_alias" auto-complete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="启动参数" :label-width="formLabelWidth">
-          <el-input v-model="schedulerForm.spider_arguments" auto-complete="off"></el-input>
+        <el-form-item label="服务项目" :label-width="formLabelWidth" prop="for_project">
+          <el-input v-model="editProjectIinfoForm.for_project" auto-complete="off" ></el-input>
         </el-form-item>
 
-        <el-form-item label="优先级" :label-width="formLabelWidth">
-          <select v-model="schedulerForm.priority">
-            <option label="Low" value="-1">Low</option>
-            <option label="Normal" value="0" selected="selected">Normal</option>
-            <option label="High" value="1">High</option>
-            <option label="Highest" value="2">Highest</option>
-          </select>
+        <el-form-item label="项目申请者" :label-width="formLabelWidth" prop="applicant">
+          <el-input v-model="editProjectIinfoForm.applicant" auto-complete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="运行服务器" :label-width="formLabelWidth">
-          <el-input v-model="schedulerForm.daemon" auto-complete="off" :disabled="true"></el-input>
-        </el-form-item>
-        
-        <el-form-item label="选择月份" :label-width="formLabelWidth">
-          <select name="cron_month" v-model="schedulerForm.cron_month">
-            <option value="*" selected="selected">Every Month</option>
-            
-            <option value="1">1</option>
-            
-            <option value="2">2</option>
-            
-            <option value="3">3</option>
-            
-            <option value="4">4</option>
-            
-            <option value="5">5</option>
-            
-            <option value="6">6</option>
-            
-            <option value="7">7</option>
-            
-            <option value="8">8</option>
-            
-            <option value="9">9</option>
-            
-            <option value="10">10</option>
-            
-            <option value="11">11</option>
-            
-            <option value="12">12</option>
-            
-        </select>
-        </el-form-item>
-        
-        <el-form-item label="选择周几运行" :label-width="formLabelWidth">
-          <select name="cron_day_of_week" v-model="schedulerForm.cron_day_of_week">
-              <option value="*" selected="selected">Every day</option>
-              <option value="0">Monday</option>
-              <option value="1">Tuesday</option>
-              <option value="2">Wednesday</option>
-              <option value="3">Thursday</option>
-              <option value="4">Friday</option>
-              <option value="5">Saturday</option>
-              <option value="6">Sunday</option>
-          </select>
+        <el-form-item label="项目开发者" :label-width="formLabelWidth" prop="developers">
+          <br/>
+          <el-checkbox-group v-model="editProjectIinfoForm.developers">
+            <el-checkbox v-for="developer_name in this.developer_list" :label="developer_name" :key="developer_name" :name="developer_name" ></el-checkbox>
+          </el-checkbox-group>
         </el-form-item>
 
-        <el-form-item label="选择每月几号运行" :label-width="formLabelWidth">
-          <select name="cron_day_of_month" v-model="schedulerForm.cron_day_of_month">
-            <option value="*" selected="selected">Every day</option>
-            
-            <option value="1">1</option>
-            
-            <option value="2">2</option>
-            
-            <option value="3">3</option>
-            
-            <option value="4">4</option>
-            
-            <option value="5">5</option>
-            
-            <option value="6">6</option>
-            
-            <option value="7">7</option>
-            
-            <option value="8">8</option>
-            
-            <option value="9">9</option>
-            
-            <option value="10">10</option>
-            
-            <option value="11">11</option>
-            
-            <option value="12">12</option>
-            
-            <option value="13">13</option>
-            
-            <option value="14">14</option>
-            
-            <option value="15">15</option>
-            
-            <option value="16">16</option>
-            
-            <option value="17">17</option>
-            
-            <option value="18">18</option>
-            
-            <option value="19">19</option>
-            
-            <option value="20">20</option>
-            
-            <option value="21">21</option>
-            
-            <option value="22">22</option>
-            
-            <option value="23">23</option>
-            
-            <option value="24">24</option>
-            
-            <option value="25">25</option>
-            
-            <option value="26">26</option>
-            
-            <option value="27">27</option>
-            
-            <option value="28">28</option>
-            
-            <option value="29">29</option>
-            
-            <option value="30">30</option>
-            
-            <option value="31">31</option>
-            
-        </select>
+        <el-form-item label="主题分类" :label-width="formLabelWidth" prop="project_cate">
+          <br/>
+          <el-radio-group v-model="editProjectIinfoForm.project_cate">
+            <el-radio :label="this.project_type[0]">{{ this.project_type[0] }}</el-radio>
+            <el-radio :label="this.project_type[1]">{{ this.project_type[1] }}</el-radio>
+            <el-radio :label="this.project_type[2]">{{ this.project_type[2] }}</el-radio>
+            <el-radio :label="this.project_type[3]">{{ this.project_type[3] }}</el-radio>
+            <el-radio :label="this.project_type[4]">{{ this.project_type[4] }}</el-radio>
+          </el-radio-group>
         </el-form-item>
-
-        <el-form-item label="选择小时" :label-width="formLabelWidth">
-          <select name="cron_hour" v-model="schedulerForm.cron_hour">
-            <option value="*" selected="selected">Every Hour</option>
-            
-            <option value="0">0</option>
-            
-            <option value="1">1</option>
-            
-            <option value="2">2</option>
-            
-            <option value="3">3</option>
-            
-            <option value="4">4</option>
-            
-            <option value="5">5</option>
-            
-            <option value="6">6</option>
-            
-            <option value="7">7</option>
-            
-            <option value="8">8</option>
-            
-            <option value="9">9</option>
-            
-            <option value="10">10</option>
-            
-            <option value="11">11</option>
-            
-            <option value="12">12</option>
-            
-            <option value="13">13</option>
-            
-            <option value="14">14</option>
-            
-            <option value="15">15</option>
-            
-            <option value="16">16</option>
-            
-            <option value="17">17</option>
-            
-            <option value="18">18</option>
-            
-            <option value="19">19</option>
-            
-            <option value="20">20</option>
-            
-            <option value="21">21</option>
-            
-            <option value="22">22</option>
-            
-            <option value="23">23</option>
-            
-        </select>
-        </el-form-item>
-
-        <el-form-item label="选择分钟" :label-width="formLabelWidth">
-          <select name="cron_minutes" v-model="schedulerForm.cron_minutes">
-              <option value="0" selected="selected">0</option>
-              
-              <option value="5">5</option>
-              
-              <option value="10">10</option>
-              
-              <option value="15">15</option>
-              
-              <option value="20">20</option>
-              
-              <option value="25">25</option>
-              
-              <option value="30">30</option>
-              
-              <option value="35">35</option>
-              
-              <option value="40">40</option>
-              
-              <option value="45">45</option>
-              
-              <option value="50">50</option>
-              
-              <option value="55">55</option>
-              
-              <option value="60">60</option>
-              
-              <option value="*">Every minute</option>
-              <option value="*/2">Every 2 minute</option>
-              <option value="*/3">Every 3 minute</option>
-              <option value="*/4">Every 4 minute</option>
-              <option value="*/5">Every 5 minute</option>
-              <option value="*/10">Every 10 minute</option>
-              <option value="*/15">Every 15 minute</option>
-              <option value="*/30">Every 30 minute</option>
-          </select>
-        </el-form-item>
-
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addScheduler">确 定</el-button>
+        <el-button @click="editProjectInfodialog = false">取 消</el-button>
+        <el-button type="primary" @click="submitEditProjectInfoForm">确 定</el-button>
       </div>
     </el-dialog>
 
     <el-dialog :visible.sync="dialogLogVisible">
-      <p v-for="log_line in log">{{log_line}}</p>
+      <p class="dispalyLog" v-for="log_line in log" :key="log_line">{{log_line}}</p>
     </el-dialog>
-
+    <el-dialog title="添加调度" :visible.sync="dialogFormVisible">
+      <div class="tip">优先级</div>
+      <div class="sub">
+          <el-radio-group v-model="schedulerForm.priority">
+              <el-radio :label="-1">较低</el-radio>
+              <el-radio :label="0">常规</el-radio>
+              <el-radio :label="1">较高</el-radio>
+              <el-radio :label="2">最高</el-radio>
+          </el-radio-group>
+      </div>
+      <div class="tip">时间参数</div>
+      <div class="sub">
+        <el-tabs type="border-card">
+            <el-tab-pane label="月份选择">
+                <el-checkbox-group v-model="schedulerForm.selectedmonths">
+                    <el-checkbox v-for="month in 12" :label="month" :key="month">{{ month >= 10 ? month:'0'+String(month)  }}</el-checkbox>
+                </el-checkbox-group>
+            </el-tab-pane>
+            <el-tab-pane label="天选择">
+                <el-checkbox-group v-model="schedulerForm.selecteddays">
+                    <el-checkbox v-for="day in 31" :label="day" :key="day">{{  day >= 10 ? day:'0'+String(day)   }}</el-checkbox>
+                </el-checkbox-group>
+            </el-tab-pane>
+            <el-tab-pane label="小时选择">
+                <el-checkbox-group v-model="schedulerForm.selectedhours">
+                    <el-checkbox v-for="hour in 24" :label="hour-1" :key="hour-1">{{ hour-1 >= 10 ? hour-1:'0'+String(hour-1) }}</el-checkbox>
+                </el-checkbox-group>
+            </el-tab-pane>
+            <el-tab-pane label="分钟选择">
+                <el-checkbox-group v-model="schedulerForm.selectedminutes">
+                    <el-checkbox v-for="minute in 60" :label="minute-1" :key="minute-1">{{ minute-1 >= 10 ? minute-1:'0'+String(minute-1)  }}</el-checkbox>
+                </el-checkbox-group>
+            </el-tab-pane>
+          </el-tabs>     
+      </div>
+      <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="addScheduler">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -335,17 +184,64 @@
   .spider {
     margin-top: 20px;
   }
+  .dispalyLog{
+    word-wrap: break-word;
+    word-break: break-all;
+    overflow: hidden;
+  }
+  #el-icon-info{
+    margin-left: 5px;
+  }
+  .tip{
+    font-size: 16px;
+    padding-left: 10px;
+    border-left: 2px solid steelblue;
+    margin: 10px 0px 0px 0px;
+}
+.sub{
+    margin: 10px 0px 25px 20px;
+}
+.el-checkbox {
+    margin-left: 10px; 
+}
+.el-checkbox:first-child {
+    margin-left: 30px; 
+}
 </style>
 
 <script>
-  import { apiGetProjectInfo, delProject } from '@/api/project'
-  import { addScheduler } from '@/api/spider'
+  import { apiListDevelopers } from '@/api/developers'
+  import { apiGetProjectInfo, delProject, apiEditProjectInfo } from '@/api/project'
+  import { addScheduler, delScheduler } from '@/api/spider'
   import { runOnce, apiCancelspider } from '@/api/spider'
   import { getMasterLog, getSlaveLog } from '@/api/spider'
 
   export default {
     data() {
       return {
+        selectedmonths: [],
+        selecteddays: [],
+        selectedhours: [],
+        selectedminutes: [],
+        selectedseconds: [],
+        developer_list: [],
+        project_type: ['开放平台', '公文公告', '餐饮', '舆情', '其他'],
+        formRules: {
+          project_name: [
+            { required: true, message: '请输入项目英文名！', trigger: 'blur' },
+            { pattern: /^[A-Za-z0-9_]+$/, message: '不允许输入空格等特殊符号' }
+          ],
+          project_alias: [{ required: true, message: '请输入项目中文名！', trigger: 'blur' }],
+          for_project: [{ required: true, message: '请输入服务项目字段信息！', trigger: 'blur' }],
+          applicant: [{ required: true, message: '请输入项目申请者字段信息！', trigger: 'blur' }],
+          developers: [{ required: true, message: '请输入项目开发者字段信息！', trigger: 'blur' }],
+          project_cate: [{ required: true, message: '请输入主题分类字段信息！', trigger: 'blur' }]
+        },
+        projectTpye: {
+          0: '单机',
+          1: '分布式'
+        },
+        editProjectIinfoForm: {},
         project_info: {
           is_msd: null,
           project_id: null,
@@ -360,16 +256,14 @@
         schedulerForm: {
           project_id: null,
           spider_name: null,
-          spider_arguments: null,
-          priority: null,
-          daemon: 'auto',
-          cron_month: '*',
-          cron_day_of_month: '*',
-          cron_day_of_week: '*',
-          cron_hour: '*',
-          cron_minutes: 0
+          selectedmonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          selecteddays: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31],
+          selectedhours: [0],
+          selectedminutes: [0],
+          priority: 0
         },
         log: [],
+        editProjectInfodialog: false,
         dialogFormVisible: false,
         dialogLogVisible: false,
         formLabelWidth: '200',
@@ -378,8 +272,40 @@
     },
     mounted: function() {
       this.getProjectInfo()
+      this.listDevelopers()
     },
     methods: {
+      async del_scheduler(job_instance_id) {
+        const res = await delScheduler(job_instance_id)
+        if (res.code === 200) {
+          this.getProjectInfo()
+        } else {
+          this.$message.error('信息更新出错')
+          return false
+        }
+      },
+      clickEditInfo() {
+        this.editProjectIinfoForm = JSON.parse(JSON.stringify(this.project_info))
+        this.editProjectIinfoForm.developers = this.editProjectIinfoForm.developers.split(',')
+        this.editProjectInfodialog = true
+      },
+      async listDevelopers() {
+        try {
+          const res = await apiListDevelopers()
+          const data_list = []
+          for (var i = 0; i < res.data.length; i++) {
+            if (res.data[i].developer_status === '0') data_list.push(res.data[i].developer_name)
+          }
+          this.developer_list = data_list
+        } catch (e) {
+          this.$message.error('开发人员列表获取错误 ' + e)
+        }
+      },
+      renderHeader(h) {
+        return (
+          <a href='https://blog.csdn.net/weixin_38296752/article/details/79715337' target='_blank' >cron表达式<i id='el-icon-info' class='el-icon-info'></i></a>
+        )
+      },
       // 获取工程信息
       async getProjectInfo() {
         try {
@@ -413,7 +339,19 @@
           })
         })
       },
-
+      // 修改工程基础信息
+      async submitEditProjectInfoForm() {
+        this.editProjectIinfoForm.developers = this.editProjectIinfoForm.developers.join(',')
+        const res = await apiEditProjectInfo(this.editProjectIinfoForm)
+        if (res.code === 200) {
+          this.editProjectInfodialog = false
+          this.$message.success('信息更新成功！')
+          this.getProjectInfo()
+        } else {
+          this.$message.error('信息更新出错')
+          return false
+        }
+      },
       // 单次运行
       runOnce: function(project_id, spider_name) {
         this.loading = true
@@ -429,10 +367,10 @@
       },
 
       // 取消爬虫
-      async cancelspider(project_id, project_name, excute_job_index) {
+      async cancelspider(project_id, project_name, job_instance_id) {
         try {
           this.loading = true
-          await apiCancelspider(project_id, project_name, excute_job_index)
+          await apiCancelspider(project_id, project_name, job_instance_id)
           this.loading = false
           this.getProjectInfo()
         } catch (e) {

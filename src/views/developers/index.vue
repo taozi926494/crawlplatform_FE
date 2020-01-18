@@ -44,7 +44,11 @@
       </el-table-column>
       <el-table-column label="操作"  align="center">
         <template slot-scope="scope">
-          <el-button size="mini"  @click="editdeveloperForm = scope.row; dialogVisible = true;">编辑</el-button>
+          <el-button 
+            size="mini"  
+            @click="editdeveloperForm=JSON.parse(JSON.stringify(scope.row)); dialogVisible=true;">
+            编辑
+          </el-button>
           <el-button  slot="reference" size="mini" @click="delDevelopers(scope.row.developer_name)">删除</el-button>
         </template>
       </el-table-column>
@@ -162,12 +166,12 @@
       },
 
       // 添加函数
-      async addDevelopers() {
-        this.$refs.developerForm.validate(valid => {
+      addDevelopers() {
+        this.$refs.developerForm.validate(async valid => {
           if (valid) {
             this.loading = true
             try {
-              apiAddDevelopers(this.developerForm)
+              await apiAddDevelopers(this.developerForm)
               this.listDevelopers()
             } catch (e) {
               this.$message.error('开发人员列表获取错误 ' + e)

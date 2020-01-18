@@ -48,9 +48,18 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="pagination">
+      <el-pagination
+        background
+        @current-change="handleCurrentChange"
+        layout="total, prev, pager, next, jumper"
+        :page-size=12
+        :total="total_num">
+      </el-pagination>
+    </div>
 
     <el-dialog :visible.sync="dialogVisible">
-      <p v-for="log_line in log">{{log_line}}</p>
+      <p class="dispalyLog" v-for="log_line in log" :key="log_line">{{log_line}}</p>
     </el-dialog>
   </div>
 </template>
@@ -67,18 +76,25 @@ export default {
       list: null,
       listLoading: true,
       log: [],
-      dialogVisible: false
+      dialogVisible: false,
+      pageIndex: 1,
+      pageSzie: 12,
+      total_num: null,
     }
   },
   created() {
     this.fetchData()
   },
   methods: {
-    //
+    handleCurrentChange(val) {
+      this.pageIndex = val
+      this.fetchData()
+    },
     fetchData() {
       this.listLoading = true
-      getAllSpider().then(response => {
-        this.list = response.data
+      getAllSpider(this.pageIndex, this.pageSzie).then(response => {
+        this.list = response.data.data
+        this.total_num = response.data.total_num
         this.listLoading = false
       })
     },
@@ -127,3 +143,14 @@ export default {
   }
 }
 </script>
+<style lang="scss" scoped>
+.pagination{
+  margin-top: 50px;
+}
+.dispalyLog{
+  word-wrap: break-word;
+  word-break: break-all;
+  overflow: hidden;
+}
+
+</style>

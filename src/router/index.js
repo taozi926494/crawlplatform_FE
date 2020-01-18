@@ -58,6 +58,12 @@ export const asyncRouterMap = [
         meta: { title: '添加项目', icon: 'add_project', roles: ['leader'] }
       },
       {
+        path: 'createproject',
+        name: '快速SCRAPY',
+        component: () => import('@/views/project/fasterscrapy'),
+        meta: { title: '快速SCRAPY', icon: 'fd-icon-faster', roles: ['leader'] }
+      },
+      {
         path: 'info/:name',
         name: '项目详情',
         hidden: true,
@@ -131,7 +137,7 @@ export const asyncRouterMap = [
         path: 'index',
         name: 'user',
         component: () => import('@/views/user/index'),
-        meta: { title: '个人中心', icon: 'user', roles: ['leader'] }
+        meta: { title: '数据中心', icon: 'user', roles: ['leader'] }
       }
     ]
   },

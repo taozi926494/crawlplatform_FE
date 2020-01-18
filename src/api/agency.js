@@ -20,11 +20,16 @@ export function apiAddAgency(pms) {
   var temp = []
   const len = pms.params.length
   for (var i = 0; i < len; i++) {
-    var key = pms.params[i]['name']
-    var value = pms.params[i]['value']
-    var _dict = {}
-    _dict[key] = value
-    temp.push(_dict)
+    const len_sub = pms.params[i].length
+    var temp_sub = []
+    for (var ii = 0; ii < len_sub; ii++) {
+      var key = pms.params[i][ii]['name']
+      var value = pms.params[i][ii]['value']
+      var _dict = {}
+      _dict[key] = value
+      temp_sub.push(_dict)
+    }
+    temp.push(temp_sub)
   }
   return new Promise((resolve, reject) => {
     request({
@@ -52,11 +57,16 @@ export function apiEditAgency(pms) {
   var temp = []
   const len = pms.params.length
   for (var i = 0; i < len; i++) {
-    var key = pms.params[i]['name']
-    var value = pms.params[i]['value']
-    var _dict = {}
-    _dict[key] = value
-    temp.push(_dict)
+    const len_sub = pms.params[i].length
+    var temp_sub = []
+    for (var ii = 0; ii < len_sub; ii++) {
+      var key = pms.params[i][ii]['name']
+      var value = pms.params[i][ii]['value']
+      var _dict = {}
+      _dict[key] = value
+      temp_sub.push(_dict)
+    }
+    temp.push(temp_sub)
   }
   return new Promise((resolve, reject) => {
     request({
@@ -81,7 +91,6 @@ export function apiEditAgency(pms) {
 }
 // 删除
 export function apiDelAgency(id) {
-  console.log(id)
   return new Promise((resolve, reject) => {
     request({
       url: 'delete_proxy_provider',
